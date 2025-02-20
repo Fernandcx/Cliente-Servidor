@@ -38,14 +38,14 @@ exports.findOne = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const { id } = req.params;
-        const [updated] = await User.update(req.body, { where: { id } });
+        const user = await User.findByPk(id);
 
-        if (!updated) {
+        if (!user) {
             return res.status(404).json({ success: false, error: 'User not found' });
         }
 
-        const updatedUser = await User.findByPk(id);
-        res.status(200).json({ success: true, data: updatedUser });
+        await user.update(req.body);
+        res.status(200).json({ success: true, data: user });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
     }
