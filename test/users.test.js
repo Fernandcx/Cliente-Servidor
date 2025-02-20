@@ -96,3 +96,26 @@ describe('User Controller - update', () => {
         expect(response.body.data.email).toBe(updatedUser.email);
     });
 });
+
+describe('User Controller - delete', () => {
+    it('should delete a user by id', async () => {
+        await User.destroy({ where: {}, truncate: true }); // Delete all records in the users table and reset the index
+        
+        const mockUser = { 
+            name: 'John Doe', 
+            email: 'john@example.com',
+            password: 'password123'
+        };
+
+        const user = await request(app)
+            .post('/api/users')
+            .send(mockUser);
+
+        const response = await request(app)
+            .delete(`/api/users/${user.body.data.id}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('message');
+        expect(response.body.message).toBe('User deleted successfully');
+    });
+});
