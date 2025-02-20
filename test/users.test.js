@@ -4,7 +4,7 @@ const User = require('../models/users'); // Ensure you are importing the correct
 
 describe('User Controller - create', () => {
     beforeEach(async () => {
-        await User.destroy({ where: {}, truncate: true }); // Borra todos los registros y reinicia los índices
+        await User.destroy({ where: {}, truncate: true }); // Delete all records in the users table and reset the index
     }); 
 
     it('should create a new user', async () => {
@@ -45,7 +45,7 @@ describe('User Controller - find methods', () => {
     });
     
     it('should return a user by id', async () => {
-        await User.destroy({ where: {}, truncate: true }); // Borra todos los registros y reinicia los índices
+        await User.destroy({ where: {}, truncate: true }); // Delete all records in the users table and reset the index
         
         const mockUser = { 
             name: 'John Doe', 
@@ -63,5 +63,36 @@ describe('User Controller - find methods', () => {
         expect(response.status).toBe(200);
         expect(response.body.data).toHaveProperty('id');
         expect(response.body.data.id).toBe(user.body.data.id);
+    });
+});
+
+describe('User Controller - update', () => {
+    it('should update a user by id', async () => {
+        await User.destroy({ where: {}, truncate: true }); // Delete all records in the users table and reset the index
+        
+        const mockUser = { 
+            name: 'John Doe', 
+            email: 'john@example.com',
+            password: 'password123'
+        };
+
+        const user = await request(app)
+            .post('/api/users')
+            .send(mockUser);
+        
+        const updatedUser = {
+            name: 'Jane Doe',
+            email: 'jane@example.com',
+            password: 'newpassword'
+        };
+
+        const response = await request(app)
+            .put(`/api/users/${user.body.data.id}`)
+            .send(updatedUser);
+        
+        expect(response.status).toBe(200);
+        expect(response.body.data).toHaveProperty('id');
+        expect(response.body.data.name).toBe(updatedUser.name);
+        expect(response.body.data.email).toBe(updatedUser.email);
     });
 });
