@@ -1,12 +1,13 @@
+const { where } = require('sequelize');
 const User = require('../models/users');
 
 // Create a new user
 exports.create = async (req, res) => {
     try {
         const user = await User.create(req.body);
-        res.status(201).json(user);
+        res.status(201).json({ success: true, data: user });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ success: false, error: error.message });
     }
 };
 
@@ -14,38 +15,54 @@ exports.create = async (req, res) => {
 exports.findAll = async (req, res) => {
     try {
         const users = await User.findAll();
-        res.json(users);
+        res.status(200).json({ success: true, data: users });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ success: false, error: error.message });
     }
 };
 
 // Get a user by id
 exports.findOne = async (req, res) => {
     try {
-        const user = await User.findOne(req.params.id);
-        res.json(user);
+        const user = await User.findByPk(req.params.id);
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        res.status(200).json({ success: true, data: user });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ success: false, error: error.message });
     }
 };
 
 // Update a user by id
 exports.update = async (req, res) => {
     try {
-        const user = await User.update(req.params.id, req.body);
-        res.json(user);
+        const { id } = req.params;
+        const [updated] = await User.update(req.body, { where: { id } });
+
+        if (!updated) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const updatedUser = await User.findByPk(id);
+        res.status(200).json({ success: true, data: updatedUser });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ success: false, error: error.message });
     }
 };
 
 // Delete a user by id
 exports.delete = async (req, res) => {
     try {
-        await User.delete(req.params.id);
-        res.json({ message: 'User deleted successfully' });
+        const { id } = req.params;
+        const deleted = await User.destroy({ where: { id } });
+
+        if (!deleted) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        res.status(200).json({ success: true, message: 'User deleted successfully' });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ success: false, error: error.message });
     }
 };
