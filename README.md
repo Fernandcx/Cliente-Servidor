@@ -1,18 +1,18 @@
 # MVC Project Template - using NodeJS, Express, Sequelize and MySQL
 Created for educational purposes for the fifth-degree groups of Software Engineering, at UNIPOLI Dgo, for the Client-Server course.
 
-## Getting Started
+## 🏗️ Getting Started
 
 These instructions will guide you through cloning and installing the project on your local machine for development and testing purposes.
 
-### Prerequisites
+### 📖 Prerequisites
 
 Ensure you have the following installed on your machine:
 
 - [Node.js](https://nodejs.org/) (version 22.13.01 or higher)
 - [npm](https://www.npmjs.com/) (Node Package Manager)
 
-### Installation
+### ⚙️ Installation
 
 1. **Clone the repository**
 
@@ -38,7 +38,7 @@ Ensure you have the following installed on your machine:
     npm install
     ```
 
-### Running the Project
+### 🚀 Running the Project
 
 To run the project, use the following command:
 
@@ -48,7 +48,7 @@ npm start
 
 The application should now be running on [http://localhost:3001](http://localhost:3001).
 
-### Additional Scripts
+### 🛠 Additional Scripts
 
 Here are some additional npm scripts you might find useful:
 
@@ -64,7 +64,7 @@ Here are some additional npm scripts you might find useful:
     npm run build
     ```
 
-### Configuration
+### ⚙️ Configuration
 
 If there are any environment variables required for your project, make sure to set them up. You can create a `.env` file in the root of the project directory and add your variables there. For example:
 
@@ -77,7 +77,7 @@ DB_PASS = your_db_user_password
 DB_NAME = your_database
 ```
 
-### Database creation and configuration
+### 🛠 Database creation and configuration
 
 1. **Connect to MySQL as Root User**
 
@@ -150,6 +150,81 @@ DB_NAME = your_database
     ```
     DESCRIBE users;
     ```
+
+### 🛠 Configuration for Running Migrations with Sequelize
+
+To successfully run migrations in this project, follow these steps:
+
+**1️⃣ Install Dependencies**
+
+Make sure you have the necessary dependencies installed:
+
+```
+npm install sequelize-cli
+```
+
+**2️⃣ Config config/config.js to use .env**
+
+
+Ensure that config/config.js loads the environment variables:
+
+```
+require('dotenv').config();
+
+module.exports = {
+  development: {
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    dialect: 'mysql'
+  },
+  test: {
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME_TEST,
+    host: process.env.DB_HOST,
+    dialect: 'mysql'
+  },
+  production: {
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    dialect: 'mysql'
+  }
+};
+```
+
+**4️⃣ Create a Migration**
+
+If you don't have a migration for a table yet, you can generate a new one with:
+
+```
+npx sequelize-cli migration:generate --name create-users-table
+```
+
+This command will create a file inside migrations/ folder where you can define the table's structure.
+
+**5️⃣ Run Migrations**
+
+- To run migrations and create tables in the database, use:
+
+```
+npx sequelize-cli db:migrate
+```
+
+- If you need to undo last migration:
+
+```
+npx sequelize-cli db:migrate:undo
+```
+
+- To undo all migrations:
+
+```
+npx sequelize-cli db:migrate:undo:all
+```
 
 ### Troubleshooting
 
