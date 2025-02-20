@@ -1,57 +1,67 @@
-const request = require("supertest");
-const app = require("../app"); // Adjust the path to your Express app
-const User = require("../models/users"); // Assuming you have a User model
+const request = require('supertest');
+const app = require('../app'); // Import your Express app
+const User = require('../models/users'); // Ensure you are importing the correct model
 
-describe("User API", () => {
-  // Clear the database before each test
-  beforeEach(async () => {
-    await User.destroy({ where: {} });
-  });
+describe('User Controller - create', () => {
+    beforeEach(async () => {
+        await User.destroy({ where: {}, truncate: true }); // Borra todos los registros y reinicia los índices
+    }); 
 
-  // Create a new user
-  it("should create a new user", async () => {
-    const newUser = {
-      name: "John Doe",
-      email: "johndoe@example.com",
-      password: "password",
-    };
+    it('should create a new user', async () => {
+        const mockUser = { 
+            name: 'John Doe', 
+            email: 'johndoe@example.com', 
+            password: 'password123' 
+        };
 
-    const res = await request(app)
-      .post("/api/users")
-      .send(newUser)
-      .set("Accept", "application/json");
+        const response = await request(app)
+            .post('/api/users') // Replace with your route
+            .send(mockUser);
 
-    expect(res.status).toBe(201); // Created
-  });
+        expect(response.status).toBe(201);
+        expect(response.body.data).toHaveProperty('id');
+        expect(response.body.data.name).toBe(mockUser.name);
+        expect(response.body.data.email).toBe(mockUser.email);
+    });
 
-  // Try to create another user with the same email
-  it("should return an error if the email is already in use", async () => {
-    const existingUser = {
-      name: "Jane Doe",
-      email: "janedoe@example.com",
-      password: "password",
-    };
+    it('should return 400 for invalid input', async () => {
+        const invalidUser = { name: '' }; // Missing required fields
 
-    await request(app)
-      .post("/api/users")
-      .send(existingUser)
-      .set("Accept", "application/json");
+        const response = await request(app)
+            .post('/api/users')
+            .send(invalidUser);
 
-    const response = await request(app)
-      .post("/api/users")
-      .send(existingUser)
-      .set("Accept", "application/json");
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error');
+    });
+});
 
-    expect(response.status).toBe(400); // Bad request
-  });
+describe('User Controller - find methods', () => {
+    it('should return an array of users', async () => {
+        const response = await request(app).get('/api/users');
 
-  // Get all users
-  it("should return an array of users", async () => {
-    const response = await request(app)
-      .get("/api/users");
-
-    expect(response.status).toBe(200);
-    expect(response.body).toBeInstanceOf(Array);
-  });
-
+        expect(response.status).toBe(200);
+        expect(response.body.data).toBeInstanceOf(Array);
+    });
+    
+    it('should return a user by id', async () => {
+        await User.destroy({ where: {}, truncate: true }); // Borra todos los registros y reinicia los índices
+        
+        const mockUser = { 
+            name: 'John Doe', 
+            email: 'johndoe@example.com', 
+            password: 'password123' 
+        };
+    
+        const user = await request(app)
+            .post('/api/users') // Replace with your route
+            .send(mockUser);
+    
+        const response = await request(app)
+            .get(`/api/users/${user.body.data.id}`);
+    
+        expect(response.status).toBe(200);
+        expect(response.body.data).toHaveProperty('id');
+        expect(response.body.data.id).toBe(user.body.data.id);
+    });
 });
